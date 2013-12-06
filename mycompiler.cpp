@@ -45,93 +45,130 @@ void parse_id_list()
 }
 
 
+
 struct assignmentStatement* get_assign_statement()
 {
     struct assignmentStatement* assign_stmt;
-
     assign_stmt = make_assign_stmtNode();
 
+    // LHS
     ttype = getToken();
     struct varNode* lhs;
-    lhs  = var_to_node_map[token];
-    lhs->name = (char*)malloc(tokenLength+1);
-    strcpy(lhs->name, token);
-    lhs->value = 0;
-    assign_stmt ->lhs =lhs;
+    lhs = var_to_node_map[token];
+    assign_stmt -> lhs = lhs;
 
     ttype = getToken();
-    if (ttype != EQUAL && ttype == SEMICOLON)
+    if (ttype != EQUAL)
     {
         return assign_stmt;
-        cout << "end of parse assign stmt"<<"\n";    
-    }
+    }     
 
+    //OP1
     ttype = getToken();
-    struct varNode* op1 = var_to_node_map[token];
-    op1->name = (char*)malloc(tokenLength+1);
+    struct varNode* op1;
     if (ttype == ID)
     {
-        strcpy(op1->name, token);
-        assign_stmt->op = 0;
-        op1->value = 0;
+        op1 = var_to_node_map[token];
     }
     else
     {
-        op1->value = ttype;     
+        op1 = make_var_node();
+        op1->value = token;   
     }
-    assign_stmt -> op1 = op1; 
-    ttype = getToken();
-    cout << "assignment Statement   "<<ttype<<"\n";
-    if (ttype == SEMICOLON)
-    {
-        assign_stmt->op = 0;
-        return assign_stmt;
-        cout << "end of parse assign stmt"<<"\n";    
-    } 
+    assign_stmt -> op1 = op1;
 
-    else if (ttype != ID)
-    {
-        assign_stmt->op = ttype;
-    }    
+    //OP
+    ttype = getToken();
+    assign_stmt -> op = ttype;
+
+    //OP2
+    ttype = getToken();
+    struct varNode* op2;
     
-    ttype = getToken();
-    cout << "assignment Statement   "<<ttype<<"\n";
-    struct varNode* op2 = var_to_node_map[token];
-    op2->name = (char*)malloc(tokenLength+1);
     if (ttype == ID)
     {
-        strcpy(op2->name, token);
-        op2->value=0;
+        op2 = var_to_node_map[token];
     }
     else
     {
-        op2->value = ttype;     
+        op2 = make_var_node();
+        op2->value = token;    
     }
     assign_stmt -> op2 = op2;
+
+    //SEMICOLON
     ttype = getToken();
-    cout << "assignment Statement   "<<ttype<<"\n";
     if (ttype == SEMICOLON)
     {
         return assign_stmt;
-        cout << "end of parse assign stmt"<<"\n";    
-    } 
-    cout << "End of parse assign statement   "<<ttype<<"\n";
-} 
+    }
 }
+
 
 struct printStatement* get_print_statement()
 {
     struct printStatement* print_stmt;
     ttype = getToken();
-    print_stmt -> id = var_to_node_map[token];
+    if (ttype == ID)
+    {
+        print_stmt -> id = var_to_node_map[token];
+    }
+    else if  (ttype == NUM)
+    {
+        print_stmt -> id = make_var_node()
+        print_stmt->id->value = token;
+    }
+
     return print_stmt;
+}
+
+
+struct statementNode* get_no_op_stmt()
+{
+    struct statementNode* st;
+    st = makestatementNode();
+    st -> stmtType = NOOPSTMT;
+    return st;
 }
 
 
 struct ifStatement* get_if_statement()
 {
     struct ifStatement* if_stmt;
+    struct statementNode* no_op_stmt;
+    struct statementNode* temp_stmt;   
+ 
+    if_stmt = make_if_stmt();
+    ttype = getToken();
+
+    if(ttype == ID)
+    {
+        if_stmt -> op1 = var_to_node[token];
+    }
+    else
+    {
+        if_stmt -> op1 = make_var_node();
+        if_stmt -> op1 -> value = token;
+    }
+
+    ttype = getToken();
+    if_stmt -> op = ttype;
     
+    ttype = getToken();
+    
+    if(ttype == ID)
+    {
+        if_stmt -> op2 = var_to_node[token];
+    }
+    else
+    {
+        if_stmt -> op2 = make_var_node();
+        if_stmt -> op2 ->value = token;
+    }
+
+    if_stmt -> trueBranch = parse_body();
+
+    return if_stmt; 
 
 }
 
@@ -158,18 +195,63 @@ struct statementNode* parse_print_stmt()
 struct statementNode* parse_if_stmt()
 {
     struct statementNode* st;
+    struct statementNode* temp_stmt;    
+    struct statementNode* no_op_stmt;
+
     st = make_statementNode();
     st -> stmtType = IFSTMT;
-    st -> print_stmt = get_if_statement();
+    st -> if_stmt = get_if_statement();
+
+    temp_stmt = st->if_stmt->trueBranch;
+
+    while(temp_stmt->next != NULL)
+    {
+        temp_stmt = temp_stmt->next;
+    }
+
+    no_op_stmt = get_no_op_statement();
+    temp->stmt->next = no_op_stmt;
+
+    st->if_stmt->falseBranch = no_op_stmt; 
+
+    st -> next = no_op_stmt;
+    st = st -> next;
     return st;
 }
+
 
 struct statementNode* parse_while_stmt()
 {
     struct statementNode* st;
+    struct statementNode* temp_stmt;
+
     st = make_statementNode();
     st -> stmtType = WHILESTMT;
-    st -> print_stmt = get_while_statement();
+    st -> while_stmt = get_while_statement();
+    
+    temp_stmt = st->print->stmt->trueBranch;
+    while(temp_stmt->next != NULL)
+    {
+        temp_stmt = temp_stmt->next;
+    }
+        
+    //GOTO STMT
+    struct statementNode* goto_stmt;
+    goto_stmt = get_goto_statement();
+    temp_stmt -> next = goto_stmt;
+    go_to_stmt->target = st;
+    temp_stmt = temp_stmt -> next;
+
+    //NOOP STMT
+    struct statmentNode* noop_stmt;
+    noop_stmt = get_no_op_stmt();
+    temp_stmt -> next = noop_stmt;    
+
+    st->while_stmt->falseBranch = temp_stmt;
+   
+    st->next = noop_stmt;
+    st=st->next;
+ 
     return st;
 }
 
@@ -193,7 +275,6 @@ struct statementNode* parse_stmt()
 
     else if (ttype == IF)
     {
-        ungetToken();
         st = parse_if_stmt();
         return st;
     }

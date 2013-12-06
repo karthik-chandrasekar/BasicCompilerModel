@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdarg.h>
 #include <ctype.h>
+using namespace std;
 
 //-------------- compiler .h ------------------------
 
@@ -668,46 +669,52 @@ void execute_program(struct statementNode * program)
 
 struct id_listNode* parse_id_list()
 {
+
+    cout << "parse id list"<<"\n";    
     struct id_listNode* idList;
     idList = make_id_listNode();
     ttype = getToken();
     struct varNode* var_node = make_varNode();
     if (ttype == ID)
     {
-        idList->var_node->name = (char*)malloc(tokenLength+1);
-        strcpy(idList->var_node->name, token);
-        idList->var_node->value = 0;
-        
+        var_node->name = (char*)malloc(tokenLength+1);
+        strcpy(var_node->name, token);
+        var_node->value = 0;
+        idList -> var_node = var_node; 
         ttype = getToken();       
  
         if (ttype == COMMA)
         {
             idList->id_list = parse_id_list();
             return idList;
+            cout << " end of parse id list"<<"\n";    
         }
         else if (ttype == SEMICOLON)
         {
             ungetToken();
             idList->id_list = NULL;
             return idList; 
+            cout << " end of parse id list"<<"\n";    
         }
-
-    }       
+    }
+    cout << "end of parse id list"<<"\n";    
 }
 
 
 struct var_declNode* parse_var_decl()
 {
+    cout << "parse var decl"<<"\n";    
     struct var_declNode* var_decl_node;
     var_decl_node = make_var_declNode(); 
-    ttype = getToken();
     var_decl_node->id_list = parse_id_list();
+    cout << "end of parse var decl"<<"\n";    
     return var_decl_node;
 }
 
 
 struct var_decl_listNode* parse_var_decl_list()
 {
+    cout << "parse var decl list"<<"\n";    
     struct var_decl_listNode* var_decl_list_node;
     var_decl_list_node = make_var_decl_listNode();
     var_decl_list_node->var_decl = parse_var_decl();
@@ -718,59 +725,76 @@ struct var_decl_listNode* parse_var_decl_list()
         ungetToken();
         var_decl_list_node->var_decl_list = parse_var_decl_list(); 
         return var_decl_list_node;
+        cout << " end of parse var decl list"<<"\n";    
     }    
     else
     {
         ungetToken();
         return var_decl_list_node;
+        cout << "end of parse var decl list"<<"\n";    
     } 
 }
 
 struct var_decl_sectionNode* parse_var_sec()
 {
+    cout << "parse var section"<<"\n"; 
+    ttype = getToken();
     struct var_decl_sectionNode* var_sec_node;
+    if (ttype != ID)
+    {
+        ungetToken();
+        return var_sec_node;
+    }   
     var_sec_node = make_var_decl_sectionNode();
     var_sec_node->var_decl_list = parse_var_decl_list();
+    cout << "end parse var section"<<"\n"; 
     return var_sec_node;
 }
 
 
 struct assignmentStatement* parse_assign_stmt()
 {
+    cout << "parse assign stmt"<<"\n";    
     struct assignmentStatement* assign_stmt;
 
     assign_stmt = make_assign_stmtNode();
 
     ttype = getToken();
-    struct varNode* lhs = make_varNode();
-    assign_stmt->lhs->name = (char*)malloc(tokenLength+1);
-    strcpy(assign_stmt->lhs->name, token);
-    assign_stmt->lhs->value = 0;
+    struct varNode* lhs;
+    lhs  = make_varNode();
+    lhs->name = (char*)malloc(tokenLength+1);
+    strcpy(lhs->name, token);
+    lhs->value = 0;
+    assign_stmt ->lhs =lhs;
 
     ttype = getToken();
     if (ttype != EQUAL && ttype == SEMICOLON)
     {
         return assign_stmt;
+        cout << "end of parse assign stmt"<<"\n";    
     }
 
     ttype = getToken();
     struct varNode* op1 = make_varNode();
-    assign_stmt->op1->name = (char*)malloc(tokenLength+1);
+    op1->name = (char*)malloc(tokenLength+1);
     if (ttype == ID)
     {
-        strcpy(assign_stmt->op1->name, token);
+        strcpy(op1->name, token);
         assign_stmt->op = 0;
+        op1->value = 0;
     }
     else
     {
-        assign_stmt->op1->value = ttype;     
-    
-    } 
+        op1->value = ttype;     
+    }
+    assign_stmt -> op1 = op1; 
     ttype = getToken();
+    cout << "assignment Statement   "<<ttype<<"\n";
     if (ttype == SEMICOLON)
     {
         assign_stmt->op = 0;
         return assign_stmt;
+        cout << "end of parse assign stmt"<<"\n";    
     } 
 
     else if (ttype != ID)
@@ -779,27 +803,33 @@ struct assignmentStatement* parse_assign_stmt()
     }    
     
     ttype = getToken();
+    cout << "assignment Statement   "<<ttype<<"\n";
     struct varNode* op2 = make_varNode();
-    assign_stmt->op2->name = (char*)malloc(tokenLength+1);
+    op2->name = (char*)malloc(tokenLength+1);
     if (ttype == ID)
     {
-        strcpy(assign_stmt->op2->name, token);
-        assign_stmt->op2->value=0;
+        strcpy(op2->name, token);
+        op2->value=0;
     }
     else
     {
-        assign_stmt->op2->value = ttype;     
+        op2->value = ttype;     
     }
+    assign_stmt -> op2 = op2;
     ttype = getToken();
+    cout << "assignment Statement   "<<ttype<<"\n";
     if (ttype == SEMICOLON)
     {
-        assign_stmt->op = 0;
         return assign_stmt;
+        cout << "end of parse assign stmt"<<"\n";    
     } 
+    cout << "End of parse assign statement   "<<ttype<<"\n";
+
 } 
 
 struct stmtNode* parse_stmt()
 {
+    cout << "parse stmt"<<"\n";    
     struct stmtNode* stmt;
     stmt = make_stmtNode();
     ttype = getToken();
@@ -809,62 +839,71 @@ struct stmtNode* parse_stmt()
         stmt->assign_stmt = parse_assign_stmt();
         stmt->stmtType = ASSIGNSTMT;
         return stmt;
+        cout << " end of parse stmt"<<"\n";    
     }
 }
 
 
 struct stmt_listNode* parse_stmt_list()
 {
+    cout << "parse stmt list"<<"\n";    
     struct stmt_listNode* stmt_list_node;
     stmt_list_node = make_stmt_listNode();
     stmt_list_node->stmt = parse_stmt();
     ttype = getToken();
+    cout << ttype<<"\n";
     if (ttype == ID)
     {
         ungetToken();
         stmt_list_node->stmt_list = parse_stmt_list();
         return stmt_list_node;
+        cout << "end of parse stmt list"<<"\n";    
     }
     else
     {
         ungetToken();
         return stmt_list_node;
+        cout << "end of parse stmt list"<<"\n";    
     }
 }
 
 
 struct bodyNode* parse_body()
 {
+
+    cout << "Parse body"<<"\n ";
     struct bodyNode* body_node;
 
     ttype = getToken();
-    if (ttype == LBRACE)
-    {
-        body_node = make_bodyNode();
-        body_node->stmt_list = parse_stmt_list();
-        ttype = getToken();
-        if (ttype == RBRACE)
-        {
-            return body_node;
-        }
-    }
+    body_node = make_bodyNode();
+    body_node->stmt_list = parse_stmt_list();
+    ttype = getToken();
+    cout << "End of parse body"<<"\n";
+    return body_node;
+
 }
 
 struct programNode* program()
 {
+    cout << "program "<<"\n";    
     struct programNode* prog;
     prog = make_programNode();
     prog->decl = parse_var_sec();
     prog->body = parse_body();
+    cout << "end of program"<<"\n";
     return prog;
+
 }
 
 struct statementNode * parse_program_and_generate_intermediate_representation()
 {
+    cout << "parse program and generate intermeid......"<<"\n";
     struct programNode* parseTree;
     parseTree = program();
 
     struct statementNode* execute_format;
+    execute_format -> stmt_type = ASSIGNSTMT;
+    cout << "end of parse program and generate intermeid......"<<"\n";
     return execute_format; 
 }
 
@@ -872,9 +911,11 @@ struct statementNode * parse_program_and_generate_intermediate_representation()
 // Entry point
 int main()
 {
+    cout << "main"<<"\n";    
 	struct statementNode * program = parse_program_and_generate_intermediate_representation();
-	execute_program(program);
-	return 0;
+	//execute_program(program);
+	cout << "No bug in PARSING !!!!"<<"\n";
+    return 0;
 }
 
 

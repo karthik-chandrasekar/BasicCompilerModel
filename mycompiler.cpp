@@ -22,9 +22,15 @@ struct statementNode* make_statementNode();
 struct assignmentStatement* make_assign_stmtNode();
 struct printStatement* make_print_stmtNode();
 struct ifStatement* make_if_stmtNode();
-
+struct gotoStatement* make_goto_statementNode();
 
 struct statementNode* parse_body();
+
+
+struct gotoStatement* make_goto_statementNode()
+{
+    return (struct gotoStatement*) malloc(sizeof(struct gotoStatement));
+}
 
 struct varNode* make_varNode()
 {
@@ -205,7 +211,7 @@ struct statementNode* get_no_op_stmt()
 
 struct ifStatement* get_if_statement()
 {
-    cout << "get if op statement - begin"<<"\n";
+    cout << "get if  statement - begin"<<"\n";
     struct ifStatement* if_stmt;
     struct statementNode* no_op_stmt;
     struct statementNode* temp_stmt;   
@@ -294,7 +300,6 @@ struct statementNode* parse_if_stmt()
     st->if_stmt->false_branch = no_op_stmt; 
 
     st -> next = no_op_stmt;
-    st = st -> next;
     cout<<"Parse if stmt - end"<<"\n"; 
     return st;
 }
@@ -303,6 +308,7 @@ struct gotoStatement* get_goto_statement()
 {
     cout<<"Parse go to e stmt - beigin"<<"\n"; 
     struct gotoStatement* go_to_stmt;
+    go_to_stmt = make_goto_statementNode();
     cout<<"Parse go to stmt - end"<<"\n"; 
     return go_to_stmt;
 }
@@ -320,15 +326,18 @@ struct statementNode* parse_while_stmt()
     st -> if_stmt = get_if_statement();
     
     temp_stmt = st->if_stmt->true_branch;
-    while(temp_stmt->next != NULL)
+    cout<<"INSIDE WHILE "<<"\n";
+    while( temp_stmt !=NULL and temp_stmt->next != NULL)
     {
         temp_stmt = temp_stmt->next;
     }
+    cout<<"INSIDE WHILE GOTO"<<"\n";
         
     //GOTO STMT
     struct statementNode* st_go;
     
     st_go = make_statementNode();
+    cout<<"INSIDE WHILE GOTO"<<"\n";
     st_go -> stmt_type = GOTOSTMT;
     st_go->goto_stmt = get_goto_statement();
 
@@ -336,6 +345,7 @@ struct statementNode* parse_while_stmt()
     st_go->goto_stmt->target = st;
     temp_stmt = temp_stmt -> next;
 
+    cout<<"BEFORE NOOP STMT"<<"\n";
     //NOOP STMT
     struct statementNode* noop_stmt;
     noop_stmt = get_no_op_stmt();
@@ -343,8 +353,6 @@ struct statementNode* parse_while_stmt()
     st->if_stmt->false_branch = noop_stmt;
    
     st->next = noop_stmt;
-    st=st->next;
- 
     cout<<"Parse while stmt - end"<<"\n"; 
     return st;
 }
@@ -379,7 +387,6 @@ struct statementNode* parse_stmt()
 
     else if (ttype == WHILE)
     {
-        ungetToken();
         st = parse_while_stmt();
         cout<<"Parse stmt - end - 4"<<"\n"; 
         return st;
@@ -394,22 +401,32 @@ struct statementNode* parse_stmt_list()
      
     struct statementNode* st;
     struct statementNode* stl;
+    struct statementNode* head;
+
     st = parse_stmt();
+    head = st;
     ttype = getToken();
     if (ttype == ID || ttype == WHILE || ttype == PRINT || ttype == IF)
     {
         ungetToken();
         stl = parse_stmt_list();
+        if (st -> next!=NULL)
+        {
+            if (st -> next -> stmt_type == NOOPSTMT)
+            {
+                st = st->next;
+            }
+        }
         st->next = stl;
         cout<<"Parse stmt list - end 1"<<"\n"; 
-        return st;
+        return head;
     }    
  
     else
     {
         ungetToken();
         cout<<"Parse stmt list - end 2"<<"\n"; 
-        return st;
+        return head;
     }
 }
 
@@ -424,13 +441,13 @@ struct statementNode* parse_body()
         ttype = getToken();
         if (ttype == RBRACE)
         {
-            cout<<"Parse body 1"<<"\n"; 
+            cout<<"End parse body 1"<<"\n"; 
             return stmt_node;
         }
-        cout<<"Parse body 2"<<"\n"; 
+        cout<<"End parse body 2"<<"\n"; 
         return stmt_node;
     }
-    cout<<"Parse body 3"<<"\n"; 
+    cout<<"End parse body 3"<<"  "<<ttype<<"\n"; 
     return stmt_node;
 }
 

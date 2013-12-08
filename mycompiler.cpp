@@ -64,13 +64,13 @@ struct gotoStatement* make_goto_stmtNode()
 
 void parse_id_list()
 {
-    cout << "Begin of parse id list"<<"\n";
+    //cout << "Begin of parse id list"<<"\n";
     ttype = getToken(); 
     if(ttype != ID)
     {
         ungetToken();
         return;
-        cout << "End of parse id list - 1"<<"\n";
+        //cout << "End of parse id list - 1"<<"\n";
     }
     struct varNode* var_node;
     var_node = make_varNode();
@@ -87,16 +87,16 @@ void parse_id_list()
     }  
     else if (ttype == SEMICOLON)
     {
-        cout << "End of parse id list - 2"<<"\n";
+        //cout << "End of parse id list - 2"<<"\n";
         return;
     }
-    cout << "End of parse id list -3 "<<"\n";
+    //cout << "End of parse id list -3 "<<"\n";
 }
 
 
 struct assignmentStatement* get_assign_statement()
 {
-    cout << "get assign statement - Begin"<<"\n";
+    //cout << "get assign statement - Begin"<<"\n";
     struct assignmentStatement* assign_stmt;
     assign_stmt = make_assign_stmtNode();
 
@@ -110,7 +110,7 @@ struct assignmentStatement* get_assign_statement()
     if (ttype != EQUAL)
     {
         return assign_stmt;
-        cout << "get assign statement - end 1"<<"\n";
+        //cout << "get assign statement - end 1"<<"\n";
     }     
 
     //OP1
@@ -131,7 +131,7 @@ struct assignmentStatement* get_assign_statement()
     ttype = getToken();
     if (ttype == SEMICOLON)
     {
-        cout << "get assign statement - end 2"<<"\n";
+        //cout << "get assign statement - end 2"<<"\n";
         assign_stmt -> op = 0;
         return assign_stmt;
     }
@@ -157,23 +157,23 @@ struct assignmentStatement* get_assign_statement()
     ttype = getToken();
     if (ttype == SEMICOLON)
     {
-        cout << "get assign statement - end 3"<<"\n";
+        //cout << "get assign statement - end 3"<<"\n";
         return assign_stmt;
     }
-    cout << "get assign statement - end 4"<<"\n";
+    //cout << "get assign statement - end 4"<<"\n";
     return assign_stmt;
 }
 
 
 struct printStatement* get_print_statement()
 {
-    cout << "get print statement - begin"<<"\n";
+    //cout << "get print statement - begin"<<"\n";
     struct printStatement* print_stmt;
     print_stmt = make_print_stmtNode();
     ttype = getToken();
     if (ttype != PRINT)
     {
-        cout << "get print statement - end1"<<"\n";
+        //cout << "get print statement - end1"<<"\n";
         return print_stmt; 
     }
     ttype = getToken();
@@ -190,28 +190,28 @@ struct printStatement* get_print_statement()
     ttype = getToken();
     if (ttype == SEMICOLON)
     {
-        cout << "get print statement - end2"<<"\n";
+        //cout << "get print statement - end2"<<"\n";
         return print_stmt;
     }
-    cout << "get print statement - end3"<<"\n";
+    //cout << "get print statement - end3"<<"\n";
     return print_stmt;
 }
 
 
 struct statementNode* get_no_op_stmt()
 {
-    cout << "get no op statement - begin"<<"\n";
+    //cout << "get no op statement - begin"<<"\n";
     struct statementNode* st;
     st = make_statementNode();
     st -> stmt_type = NOOPSTMT;
-    cout << "get no op statement - end"<<"\n";
+    //cout << "get no op statement - end"<<"\n";
     return st;
 }
 
 
 struct ifStatement* get_if_statement()
 {
-    cout << "get if  statement - begin"<<"\n";
+    //cout << "get if  statement - begin"<<"\n";
     struct ifStatement* if_stmt;
     struct statementNode* no_op_stmt;
     struct statementNode* temp_stmt;   
@@ -246,38 +246,38 @@ struct ifStatement* get_if_statement()
 
     if_stmt->true_branch = parse_body();
 
-    cout << "get if op statement - end"<<"\n";
+    //cout << "get if op statement - end"<<"\n";
     return if_stmt; 
 
 }
 
 struct statementNode* parse_assign_stmt()
 {
-    cout<<"Parse assign stmt - beigin"<<"\n"; 
+    //cout<<"Parse assign stmt - beigin"<<"\n"; 
     struct statementNode* st;
     st = make_statementNode();
     st -> stmt_type = ASSIGNSTMT;
     st -> assign_stmt = get_assign_statement(); 
-    cout<<"Parse assign stmt - end"<<"\n"; 
+    //cout<<"Parse assign stmt - end"<<"\n"; 
     return st; 
 } 
 
 
 struct statementNode* parse_print_stmt()
 {
-    cout<<"Parse print stmt - beigin"<<"\n"; 
+    //cout<<"Parse print stmt - beigin"<<"\n"; 
     struct statementNode* st;
     st = make_statementNode();
     st -> stmt_type = PRINTSTMT;
     st -> print_stmt = get_print_statement();
-    cout<<"Parse print stmt - end"<<"\n"; 
+    //cout<<"Parse print stmt - end"<<"\n"; 
     return st;
 
 }
 
 struct statementNode* parse_if_stmt()
 {
-    cout<<"Parse if stmt - beigin"<<"\n"; 
+    //cout<<"Parse if stmt - beigin"<<"\n"; 
     struct statementNode* st;
     struct statementNode* temp_stmt;    
     struct statementNode* no_op_stmt;
@@ -300,24 +300,100 @@ struct statementNode* parse_if_stmt()
     st->if_stmt->false_branch = no_op_stmt; 
 
     st -> next = no_op_stmt;
-    cout<<"Parse if stmt - end"<<"\n"; 
+    //cout<<"Parse if stmt - end"<<"\n"; 
     return st;
 }
 
 struct gotoStatement* get_goto_statement()
 {
-    cout<<"Parse go to e stmt - beigin"<<"\n"; 
+    //cout<<"Parse go to e stmt - beigin"<<"\n"; 
     struct gotoStatement* go_to_stmt;
     go_to_stmt = make_goto_statementNode();
-    cout<<"Parse go to stmt - end"<<"\n"; 
+    //cout<<"Parse go to stmt - end"<<"\n"; 
     return go_to_stmt;
+}
+
+
+struct ifStatement* get_repeat_if_statement()
+{
+    //cout << "REPEAT IF Statement - begins"<<"\n";
+    struct ifStatement* if_stmt;
+    
+    if_stmt = make_if_stmtNode();
+    ttype = getToken();
+    //cout << "REPEAT IF -  "<<ttype<<"\n";
+
+    if(ttype == ID)
+    {
+        if_stmt -> op1 = var_to_node_map[token];
+    }
+    else
+    {
+        if_stmt -> op1 = make_varNode();
+        if_stmt -> op1 -> value = atoi(token);
+    }
+
+    ttype = getToken();
+    //cout << "REPEAT IF -  "<<ttype<<"\n";
+    if_stmt -> relop = ttype;
+    ttype = getToken();
+    //cout << "REPEAT IF -  "<<ttype<<"\n";
+    
+    if(ttype == ID)
+    {
+        if_stmt -> op2 = var_to_node_map[token];
+    }
+    else
+    {
+        if_stmt -> op2 = make_varNode();
+        if_stmt -> op2 ->value = atoi(token);
+    }
+
+    //cout << "REPEAT IF Statement - Ends"<<"\n";
+    return if_stmt;
+}
+
+struct statementNode* parse_repeat_stmt()
+{
+   
+    //cout << "Parse repeat statement begins"<<"\n"; 
+    struct statementNode* st;
+    struct statementNode* body_stmt;
+    struct statementNode* temp_stmt;
+
+    body_stmt = parse_body();
+
+    st = make_statementNode();
+    st -> stmt_type = IFSTMT;
+    ttype = getToken();
+    st -> if_stmt = get_repeat_if_statement();
+    st -> if_stmt -> true_branch = body_stmt;
+
+    temp_stmt = body_stmt;
+   
+    while (temp_stmt->next != NULL)
+    {
+        temp_stmt = temp_stmt->next;
+    }
+
+    temp_stmt -> next = st;
+ 
+    struct statementNode* noop_stmt;
+   
+    noop_stmt = get_no_op_stmt();
+    st -> if_stmt->false_branch = noop_stmt;
+    st->next = noop_stmt;
+    
+    //cout << "Parse repeat statement ends"<<"\n";
+    return body_stmt; 
+
 }
 
 
 struct statementNode* parse_while_stmt()
 {
 
-    cout<<"Parse while stmt - beigin"<<"\n"; 
+    //cout<<"Parse while stmt - beigin"<<"\n"; 
     struct statementNode* st;
     struct statementNode* temp_stmt;
 
@@ -326,18 +402,18 @@ struct statementNode* parse_while_stmt()
     st -> if_stmt = get_if_statement();
     
     temp_stmt = st->if_stmt->true_branch;
-    cout<<"INSIDE WHILE "<<"\n";
+    //cout<<"INSIDE WHILE "<<"\n";
     while( temp_stmt !=NULL and temp_stmt->next != NULL)
     {
         temp_stmt = temp_stmt->next;
     }
-    cout<<"INSIDE WHILE GOTO"<<"\n";
+    //cout<<"INSIDE WHILE GOTO"<<"\n";
         
     //GOTO STMT
     struct statementNode* st_go;
     
     st_go = make_statementNode();
-    cout<<"INSIDE WHILE GOTO"<<"\n";
+    //cout<<"INSIDE WHILE GOTO"<<"\n";
     st_go -> stmt_type = GOTOSTMT;
     st_go->goto_stmt = get_goto_statement();
 
@@ -345,7 +421,7 @@ struct statementNode* parse_while_stmt()
     st_go->goto_stmt->target = st;
     temp_stmt = temp_stmt -> next;
 
-    cout<<"BEFORE NOOP STMT"<<"\n";
+    //cout<<"BEFORE NOOP STMT"<<"\n";
     //NOOP STMT
     struct statementNode* noop_stmt;
     noop_stmt = get_no_op_stmt();
@@ -353,20 +429,20 @@ struct statementNode* parse_while_stmt()
     st->if_stmt->false_branch = noop_stmt;
    
     st->next = noop_stmt;
-    cout<<"Parse while stmt - end"<<"\n"; 
+    //cout<<"Parse while stmt - end"<<"\n"; 
     return st;
 }
 
 struct statementNode* parse_stmt()
 {
-    cout<<"Parse stmt - begin"<<"\n"; 
+    //cout<<"Parse stmt - begin"<<"\n"; 
     struct statementNode* st;
     ttype = getToken();
     if (ttype == ID)
     {
         ungetToken();
         st = parse_assign_stmt();
-        cout<<"Parse stmt - end - 1"<<"\n"; 
+        //cout<<"Parse stmt - end - 1"<<"\n"; 
         return st;
     }
 
@@ -374,22 +450,29 @@ struct statementNode* parse_stmt()
     {
         ungetToken();
         st = parse_print_stmt();
-        cout<<"Parse stmt - end - 2"<<"\n"; 
+        //cout<<"Parse stmt - end - 2"<<"\n"; 
         return st;
     }
 
     else if (ttype == IF)
     {
         st = parse_if_stmt();
-        cout<<"Parse stmt - end - 3"<<"\n"; 
+        //cout<<"Parse stmt - end - 3"<<"\n"; 
         return st;
     }
 
     else if (ttype == WHILE)
     {
         st = parse_while_stmt();
-        cout<<"Parse stmt - end - 4"<<"\n"; 
+        //cout<<"Parse stmt - end - 4"<<"\n"; 
         return st;
+    }
+
+    else if (ttype == REPEAT)
+    {
+        st = parse_repeat_stmt();
+        //cout<<"Parse stmt - end - 5"<<"\n"; 
+        return st; 
     }
     return st;
 }
@@ -397,7 +480,7 @@ struct statementNode* parse_stmt()
 
 struct statementNode* parse_stmt_list()
 {
-    cout<<"Parse stmt list"<<"\n"; 
+    //cout<<"Parse stmt list"<<"\n"; 
      
     struct statementNode* st;
     struct statementNode* stl;
@@ -406,7 +489,7 @@ struct statementNode* parse_stmt_list()
     st = parse_stmt();
     head = st;
     ttype = getToken();
-    if (ttype == ID || ttype == WHILE || ttype == PRINT || ttype == IF)
+    if (ttype == ID || ttype == WHILE || ttype == PRINT || ttype == IF || ttype == REPEAT)
     {
         ungetToken();
         stl = parse_stmt_list();
@@ -418,21 +501,21 @@ struct statementNode* parse_stmt_list()
             }
         }
         st->next = stl;
-        cout<<"Parse stmt list - end 1"<<"\n"; 
+        //cout<<"Parse stmt list - end 1"<<"\n"; 
         return head;
     }    
  
     else
     {
         ungetToken();
-        cout<<"Parse stmt list - end 2"<<"\n"; 
+        //cout<<"Parse stmt list - end 2"<<"\n"; 
         return head;
     }
 }
 
 struct statementNode* parse_body()
 {
-    cout<<"Parse body"<<"\n"; 
+    //cout<<"Parse body"<<"\n"; 
     struct statementNode* stmt_node;
     ttype = getToken();
     if (ttype == LBRACE)
@@ -441,13 +524,13 @@ struct statementNode* parse_body()
         ttype = getToken();
         if (ttype == RBRACE)
         {
-            cout<<"End parse body 1"<<"\n"; 
+            //cout<<"End parse body 1"<<"\n"; 
             return stmt_node;
         }
-        cout<<"End parse body 2"<<"\n"; 
+        //cout<<"End parse body 2"<<"\n"; 
         return stmt_node;
     }
-    cout<<"End parse body 3"<<"  "<<ttype<<"\n"; 
+    //cout<<"End parse body 3"<<"  "<<ttype<<"\n"; 
     return stmt_node;
 }
 
